@@ -3,54 +3,55 @@
 using namespace std;
 
 int count = 0;
-int N, col = 0;
+int N = 0;
+int QueenCanExist[15][15] = {};
+int recursion = 0;
 
-
-void setQ(bool* arr[], int col, int row) {
-    for(int i = 0; i < N; i++) {
-        arr[col][i] = true;    // 같은 열
-        arr[i][row] = true;    // 같은 행
+void rangeQueen(int col, int row, int state) {
+    //가로
+    for(int i= 0; i<N; i++) QueenCanExist[col][i] += state;
+    //세로
+    for(int i= 0; i<N; i++) QueenCanExist[i][row] += state;
+    //↗방향
+    for(int i= 0; col-i >=0 && row+i <= N; i++){
+        QueenCanExist[col-i][row+i] += state;
     }
-
-    for(int i = 0; i < N; i++) {
-        // ↘ 방향
-        if(col + i < N && row + i < N)
-            arr[col + i][row + i] = true;
-
-        // ↗ 방향
-        if(col + i < N && row - i >= 0)
-            arr[col + i][row - i] = true;
-
-        // ↙ 방향
-        if(col - i >= 0 && row + i < N)
-            arr[col - i][row + i] = true;
-
-        // ↖ 방향
-        if(col - i >= 0 && row - i >= 0)
-            arr[col - i][row - i] = true;
-    }
+    //↙방향 
+    for(int i= 0; row-i >=0 && col+i <= N; i++){
+        QueenCanExist[col+i][row-i] += state;
+    }   
+    //↖방향
+    for(int i= 0; row-i >=0 && col-i >= N; i++){
+        QueenCanExist[col-i][row-i] += state;
+    }    
+    //↙방향 
+    for(int i= 0; row+i <=14 && col+i <= N; i++){
+        QueenCanExist[col+i][row+i] += state;
+    }     
+     
 }
 
-void func(bool* arr[], int n){
-    if(n==1){
+void setQueen(int N, int numOfQueen){
+    if(N==numOfQueen){
         count++;
         return;
     }
-    for(int i = 0; i<N; i++){
+    int i = numOfQueen;
         for(int j = 0; j<N; j++){
-            if(!arr[i][j]){//다음 열에 둘 곳이 있다면.
-                setQ(arr, i,j);
-                func(arr, n-1);//1개의 퀸을 어딘가 둠.
+            if(QueenCanExist[i][j] <=0) {
+                recursion++;
+                numOfQueen++;
+                rangeQueen(i,j,1);
+                setQueen(N, numOfQueen);
+                numOfQueen--;
+                rangeQueen(i,j,-1);
             }
-            else return;
         }
-    }    
+    
 }
 
 int main(){
     cin >> N;
-    bool* arr[15] = {};
-    for(int i = 0; i<15; i++) arr[i] = new bool[15]{};
-    func(arr, N);
+    setQueen(N, 0);
     cout << count;
 }
